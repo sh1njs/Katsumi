@@ -1,6 +1,8 @@
+import deepinfra from "#lib/scrapers/deepseek";
+
 export default {
 	name: "gpt",
-	description: "Chat with AI.",
+	description: "Chat with AI (DeepSeek Models).",
 	command: ["ai", "gpt"],
 	permissions: "all",
 	hidden: false,
@@ -17,31 +19,50 @@ export default {
 	owner: false,
 
 	/**
-	 * @param {import('baileys').WASocket} sock - The Baileys socket object.
-	 * @param {object} m - The serialized message object.
+	 * @param {import("../../lib/serialize").default} m
+	 * @param {{ sock: import("baileys").WASocket }}
 	 */
-	execute: async (m, { api }) => {
-		let query = m.text;
-		if (m.quoted?.text.length > 0 && query.length > 0) {
-			query += "\n\n" + m.quoted.text;
-		} else if (query.length == 0 && m.quoted?.text.length > 0) {
-			query = m.quoted.text;
+	async execute(m, { sock }) {
+		let input = m.text?.trim();
+
+		if (!input && m.quoted?.text) {
+			input = m.quoted.text;
 		}
 
-		const { data } = await api.Gratis.post("/gpt/chat", {
-			model: "gpt-4o-mini",
-			messages: [
-				{ role: "developer", content: "You are a helpful assistant." },
-				{ role: "user", content: query },
-			],
+		if (!input) {
+			return m.reply("Please enter a question or message.");
+		}
+
+		if (!sock.deepseek) sock.deepseek = {};
+		if (!sock.deepseek[m.sender]) {
+			sock.deepseek[m.sender] = [];
+		}
+
+		sock.deepseek[m.sender].push({
+			role: "user",
+			content: input,
 		});
 
-		const { status, message, result } = data;
+		try {
+			const res = await deepinfra(
+				"deepseek-ai/DeepSeek-V3.1",
+				sock.deepseek[m.sender]
+			);
 
-		if (!status) {
-			return m.reply(message);
+			sock.deepseek[m.sender].push({
+				role: "assistant",
+				content: res,
+			});
+
+			if (sock.deepseek[m.sender].length > 20) {
+				sock.deepseek[m.sender] =
+					sock.deepseek[m.sender].slice(-20);
+			}
+
+			await m.reply(res);
+		} catch (err) {
+			console.error(err);
+			await m.reply("An error occurred while contacting the AI.");
 		}
-
-		await m.reply(result.choices[0].message.content);
 	},
 };

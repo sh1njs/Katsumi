@@ -2,6 +2,8 @@ import { exec } from "child_process";
 import { readFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import util from "util";
+import { fetchBuffer } from "#lib/functions";
+import { APIRequest as api } from "#utils/API/request";
 
 const execPromise = util.promisify(exec);
 
@@ -50,5 +52,60 @@ export async function downloadYt(url, opts = {}) {
 	return {
 		buffer,
 		fileName: `${title.replace(/[\\/:*?"<>|]/g, "").slice(0, 60) || "yt"}.${outputExt}`,
+	};
+}
+
+/**
+ * Download YouTube audio/video via API
+ * @param {String} url
+ * @param {Object} opts
+ * @param {Boolean} opts.video
+ * @param {String} opts.videoQuality
+ * @param {String} opts.audioFormat
+ * @returns {Promise<{ buffer: Buffer, mimetype: string, fileName: string }>}
+ */
+export async function downloadApiYt(url, opts = {}) {
+	const {
+		video = false,
+		videoQuality = "360p",
+		audioFormat = "mp3",
+		title = "youtube",
+	} = opts;
+
+	const idl = await api.Gratis.post("/downloader/youtube", {
+		url,
+		video: videoQuality,
+		audio: audioFormat,
+	});
+
+	const { status, result } = idl.data;
+
+	console.log(
+		"[YT API DEBUG]",
+		JSON.stringify({ status, result }, null, 2)
+	);
+
+	if (!status || !result) {
+		throw new Error("Failed to fetch media from API");
+	}
+
+	const media = video ? result.video : result.audio;
+	if (!media || !media.url) {
+		throw new Error("Media URL not found");
+	}
+
+	const fileRes = await fetchBuffer(media.url);
+	const buffer = fileRes.data;
+
+	const ext = video ? "mp4" : audioFormat;
+	const mimetype = video ? "video/mp4" : "audio/mpeg";
+
+	const safeTitle =
+		title.replace(/[\\/:*?"<>|]/g, "").slice(0, 60) || "yt";
+
+	return {
+		buffer,
+		mimetype,
+		fileName: `${safeTitle}.${ext}`,
 	};
 }

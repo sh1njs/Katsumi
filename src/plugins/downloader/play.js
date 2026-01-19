@@ -1,4 +1,4 @@
-import { downloadYt } from "#lib/yt-dlp";
+import { downloadApiYt } from "#lib/yt-dlp";
 
 export default {
 	name: "play",
@@ -50,7 +50,7 @@ export default {
 
 		if (isLink) {
 			await m.reply(`⏳ Downloading ${isVideo ? "video" : "audio"}...`);
-			const { buffer, fileName } = await downloadYt(url, {
+			const { buffer, fileName } = await downloadApiYt(url, {
 				video: isVideo,
 			});
 			const mimetype = isVideo ? "video/mp4" : "audio/mpeg";
@@ -146,7 +146,7 @@ export default {
 				"_Your file will be sent shortly._".trim()
 		);
 
-		const { buffer, fileName } = await downloadYt(chosen.url, {
+		const { buffer, fileName } = await downloadApiYt(chosen.url, {
 			video: isVideo,
 			title: chosen.title,
 		});

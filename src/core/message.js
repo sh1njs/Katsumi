@@ -75,6 +75,18 @@ class Message {
 					m
 				);
 
+				let groups = {};
+				try {
+					if (!db?.GroupModel?.getGroup) {
+						console.warn("[DB] GroupModel not ready; using empty groups.");
+					} else {
+						groups = await db.GroupModel.getGroup(m.from);
+					}
+				} catch (err) {
+					console.error("[DB] Failed to load groups:", err);
+					groups = {};
+				}
+
 				m.prefix = prefix;
 				m.isCommand = isCommand;
 				m.command = command;
@@ -82,6 +94,9 @@ class Message {
 				m.text = text;
 
 				if (settings.self && !m.isOwner && !m.isClonebot) {
+					continue;
+				}
+				if (m.isGroup && groups?.banned && !m.isOwner) {
 					continue;
 				}
 				if (settings.groupOnly && !m.isGroup && !m.isOwner) {
