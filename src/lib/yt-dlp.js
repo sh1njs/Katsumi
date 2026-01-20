@@ -1,9 +1,9 @@
+import { fetchBuffer } from "#lib/functions";
+import { APIRequest as api } from "#utils/API/request";
 import { exec } from "child_process";
 import { readFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import util from "util";
-import { fetchBuffer } from "#lib/functions";
-import { APIRequest as api } from "#utils/API/request";
 
 const execPromise = util.promisify(exec);
 
@@ -80,10 +80,7 @@ export async function downloadApiYt(url, opts = {}) {
 
 	const { status, result } = idl.data;
 
-	console.log(
-		"[YT API DEBUG]",
-		JSON.stringify({ status, result }, null, 2)
-	);
+	console.log("[YT API DEBUG]", JSON.stringify({ status, result }, null, 2));
 
 	if (!status || !result) {
 		throw new Error("Failed to fetch media from API");
@@ -100,8 +97,7 @@ export async function downloadApiYt(url, opts = {}) {
 	const ext = video ? "mp4" : audioFormat;
 	const mimetype = video ? "video/mp4" : "audio/mpeg";
 
-	const safeTitle =
-		title.replace(/[\\/:*?"<>|]/g, "").slice(0, 60) || "yt";
+	const safeTitle = title.replace(/[\\/:*?"<>|]/g, "").slice(0, 60) || "yt";
 
 	return {
 		buffer,

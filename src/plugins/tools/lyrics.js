@@ -53,7 +53,7 @@ export default {
 		result.forEach((track, i) => {
 			nginfo += `*${i + 1}*. ${track.artist} - ${track.title}\n`;
 		});
-		nginfo += `\n_Timeout in 60 seconds_`;
+		nginfo += "\n_Timeout in 60 seconds_";
 
 		const sent = await m.reply(nginfo.trim());
 

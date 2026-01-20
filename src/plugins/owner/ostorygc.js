@@ -1,5 +1,5 @@
-import crypto from "crypto";
 import { isMediaMessage } from "#lib/media";
+import crypto from "node:crypto";
 
 export default {
 	name: "oswgc",
@@ -24,7 +24,9 @@ export default {
 	 * @param {{ sock: import("baileys").WASocket }}
 	 */
 	async execute(m, { sock, text }) {
-		if (!sock.swgc) sock.swgc = {};
+		if (!sock.swgc) {
+			sock.swgc = {};
+		}
 
 		const q = m.isQuoted ? m.quoted : m;
 		const type = q.type || "";
@@ -39,13 +41,15 @@ export default {
 
 		if (type === "imageMessage" || /image/.test(mime)) {
 			const buffer = await q.download();
-			if (!buffer) return m.reply("Download failed");
-
+			if (!buffer) {
+				return m.reply("Download failed");
+			}
 			content = { image: buffer, caption };
 		} else if (type === "videoMessage" || /video/.test(mime)) {
 			const buffer = await q.download();
-			if (!buffer) return m.reply("Download failed");
-
+			if (!buffer) {
+				return m.reply("Download failed");
+			}
 			content = { video: buffer, caption };
 		} else if (
 			type === "audioMessage" ||
@@ -53,16 +57,15 @@ export default {
 			/audio/.test(mime)
 		) {
 			const buffer = await q.download();
-			if (!buffer) return m.reply("Download failed");
-
+			if (!buffer) {
+				return m.reply("Download failed");
+			}
 			content = { audio: buffer, mimetype: "audio/mp4" };
 		} else {
 			content = { text: caption };
 		}
 
-		const groups = Object.values(
-			await sock.groupFetchAllParticipating()
-		);
+		const groups = Object.values(await sock.groupFetchAllParticipating());
 
 		if (!groups.length) {
 			return m.reply("No groups found.");
@@ -94,28 +97,30 @@ export default {
 	 */
 	async after(m, { sock }) {
 		const session = sock.swgc?.[m.sender];
-		if (!session) return;
-		if (!m.quoted || m.quoted.id !== session.messageId) return;
+		if (!session) {
+			return;
+		}
+		if (!m.quoted || m.quoted.id !== session.messageId) {
+			return;
+		}
 
 		// Parse input: "1", "1,2", "1, 2"
 		const indexes = [
 			...new Set(
 				m.body
 					.split(",")
-					.map(v => parseInt(v.trim()))
-					.filter(v => !isNaN(v))
+					.map((v) => parseInt(v.trim()))
+					.filter((v) => !isNaN(v))
 			),
-		].filter(i => i >= 1 && i <= session.groups.length);
+		].filter((i) => i >= 1 && i <= session.groups.length);
 
 		if (!indexes.length) {
 			delete sock.swgc[m.sender];
 			return m.reply("Invalid input. Use numbers like: 1 or 1,2");
 		}
 
-		const {
-			generateWAMessageContent,
-			generateWAMessageFromContent,
-		} = await import("baileys");
+		const { generateWAMessageContent, generateWAMessageFromContent } =
+			await import("baileys");
 
 		const sentGroups = [];
 
@@ -125,10 +130,9 @@ export default {
 			const secret = new Uint8Array(32);
 			crypto.getRandomValues(secret);
 
-			const inside = await generateWAMessageContent(
-				session.content,
-				{ upload: sock.waUploadToServer }
-			);
+			const inside = await generateWAMessageContent(session.content, {
+				upload: sock.waUploadToServer,
+			});
 
 			const msg = generateWAMessageFromContent(
 				group.id,

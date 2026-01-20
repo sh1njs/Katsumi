@@ -37,7 +37,7 @@ export default {
 			return m.reply(message);
 		}
 
-		let cap = `*Detected Songs*\n\n`;
+		let cap = "*Detected Songs*\n\n";
 		result.music.forEach((song, index) => {
 			cap += `*${index + 1}. ${song.title}*\n`;
 			cap += `- *Score:* ${song.score}\n`;
@@ -65,7 +65,7 @@ export default {
 						: "N/A"
 				}\n`;
 			}
-			cap += `\n`;
+			cap += "\n";
 		});
 
 		m.reply(cap.trim());

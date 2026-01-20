@@ -32,7 +32,6 @@
 	"dependencies": {
 		"axios": "^1.13.2",
 		"baileys": "npm:baileys",
-		"crypto": "^1.0.1",
 		"file-type": "^21.0.0",
 		"fluent-ffmpeg": "^2.1.3",
 		"jimp": "^1.6.0",

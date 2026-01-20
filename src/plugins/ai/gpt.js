@@ -33,7 +33,9 @@ export default {
 			return m.reply("Please enter a question or message.");
 		}
 
-		if (!sock.deepseek) sock.deepseek = {};
+		if (!sock.deepseek) {
+			sock.deepseek = {};
+		}
 		if (!sock.deepseek[m.sender]) {
 			sock.deepseek[m.sender] = [];
 		}
@@ -55,8 +57,7 @@ export default {
 			});
 
 			if (sock.deepseek[m.sender].length > 20) {
-				sock.deepseek[m.sender] =
-					sock.deepseek[m.sender].slice(-20);
+				sock.deepseek[m.sender] = sock.deepseek[m.sender].slice(-20);
 			}
 
 			await m.reply(res);

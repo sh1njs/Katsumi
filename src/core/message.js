@@ -78,7 +78,9 @@ class Message {
 				let groups = {};
 				try {
 					if (!db?.GroupModel?.getGroup) {
-						console.warn("[DB] GroupModel not ready; using empty groups.");
+						console.warn(
+							"[DB] GroupModel not ready; using empty groups."
+						);
 					} else {
 						groups = await db.GroupModel.getGroup(m.from);
 					}

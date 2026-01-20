@@ -27,7 +27,9 @@ export default {
 			);
 		}
 
-		const match = text.match(/https:\/\/chat\.whatsapp\.com\/([A-Za-z0-9]+)/);
+		const match = text.match(
+			/https:\/\/chat\.whatsapp\.com\/([A-Za-z0-9]+)/
+		);
 		if (!match) {
 			return m.reply("Invalid WhatsApp group link.");
 		}
@@ -38,6 +40,7 @@ export default {
 			const groupId = await sock.groupAcceptInvite(inviteCode);
 			m.reply(`Successfully joined the group.\nGroup ID: ${groupId}`);
 		} catch (err) {
+			console.error("Join error:", err);
 			m.reply(
 				"Failed to join the group.\nThe link may be invalid, expired, or the bot is already removed."
 			);
